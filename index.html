@@ -115,7 +115,6 @@
             font-weight: 600;
         }
 
-        /* Sub-tabs inside SIP Mode Selector */
         .sub-tabs {
             display: flex;
             gap: 16px;
@@ -153,7 +152,6 @@
             padding-top: 20px;
         }
 
-        /* Dynamic Pie chart configuration */
         .pie-chart {
             width: 150px;
             height: 150px;
@@ -276,6 +274,17 @@
             font-size: 18px;
         }
 
+        /* Words at Bottom styling */
+        .bottom-words-display {
+            font-size: 13px;
+            color: var(--primary-green);
+            font-weight: 500;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+            text-transform: capitalize;
+        }
+
         .alert-box {
             margin-top: 16px;
             padding: 12px;
@@ -382,6 +391,13 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 6px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-1px);
         }
 
         .history-item div span {
@@ -407,7 +423,6 @@
     
     <div class="main-content">
         
-        <!-- STEP-UP SWP CALCULATOR CARD -->
         <div class="calculator-card active" id="card-swp">
             <div class="calc-header-row">
                 <h2>SWP Calculator with Step-Up</h2>
@@ -495,12 +510,12 @@
                 <div class="result-row"><span class="result-label">Total investment</span><span class="result-value" id="res-swp-invested">₹0</span></div>
                 <div class="result-row"><span class="result-label">Total withdrawal</span><span class="result-value" id="res-swp-withdrawn">₹0</span></div>
                 <div class="result-row"><span class="result-label">Final value</span><span class="result-value highlight-value" id="res-swp-final">₹0</span></div>
+                <div class="bottom-words-display" id="words-swp-bottom"></div>
                 <div class="alert-box alert-danger" id="swp-depletion-alert"></div>
                 <button class="btn-log" id="btn-save-swp">Save to History</button>
             </div>
         </div>
 
-        <!-- DYNAMIC SIP / LUMPSUM CALCULATOR CARD -->
         <div class="calculator-card" id="card-sip">
             <div class="calc-header-row">
                 <h2>SIP Calculator</h2>
@@ -559,6 +574,7 @@
                 <div class="result-row"><span class="result-label">Invested amount</span><span class="result-value" id="res-sip-invested">₹0</span></div>
                 <div class="result-row"><span class="result-label">Est. returns</span><span class="result-value" id="res-sip-returns">₹0</span></div>
                 <div class="result-row"><span class="result-label">Total value</span><span class="result-value highlight-value" id="res-sip-total">₹0</span></div>
+                <div class="bottom-words-display" id="words-sip-bottom"></div>
                 <button class="btn-log" id="btn-save-sip">Save to History</button>
             </div>
         </div>
@@ -586,7 +602,7 @@
 <script>
     const START_YEAR = 2026;
     let calculationHistory = JSON.parse(localStorage.getItem('dashboard_history')) || [];
-    let currentSipMode = 'monthly'; // 'monthly' or 'lumpsum'
+    let currentSipMode = 'monthly';
 
     const swpFields = {
         investment: { slider: document.getElementById('input-swp-investment'), txt: document.getElementById('txt-swp-investment'), words: document.getElementById('words-swp-investment'), raw: 0, type: 'currency' },
@@ -603,7 +619,6 @@
         years: { slider: document.getElementById('input-sip-years'), txt: document.getElementById('txt-sip-years'), words: document.getElementById('words-sip-years'), raw: 0, type: 'numeric' }
     };
 
-    // Theme toggler logic
     document.getElementById('theme-toggle').addEventListener('click', () => {
         const bodyClass = document.body.classList;
         if (bodyClass.contains('light-theme')) {
@@ -615,8 +630,8 @@
         }
     });
 
-    // Formatting & Utility functions
     function cleanNumber(str) { return parseFloat(str.replace(/[^0-9.-]/g, '')) || 0; }
+    
     function formatIndianCurrency(num) {
         if (num === 0) return '₹0';
         const x = Math.round(num).toString();
@@ -625,6 +640,7 @@
         if (otherNumbers !== '') lastThree = ',' + lastThree;
         return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
     }
+
     function formatRawToIndianCommas(num, type) {
         if (num === 0) return '';
         if (type === 'percent') return num + '%';
@@ -635,12 +651,34 @@
         if (otherNumbers !== '') lastThree = ',' + lastThree;
         return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
     }
+
     function convertToIndianWords(num) {
         if (num === 0) return '';
         if (num >= 10000000) return parseFloat((num / 10000000).toFixed(2)) + ' Crore';
         if (num >= 100000) return parseFloat((num / 100000).toFixed(2)) + ' Lakh';
         if (num >= 1000) return parseFloat((num / 1000).toFixed(2)) + ' Thousand';
         return num.toString();
+    }
+
+    // Precise Full Word Translation for Bottom Results
+    function convertToFullWords(num) {
+        if (num <= 0) return '';
+        let str = '';
+        let cr = Math.floor(num / 10000000);
+        num %= 10000000;
+        let lakh = Math.floor(num / 100000);
+        num %= 100000;
+        let thousand = Math.floor(num / 1000);
+        num %= 1000;
+        let remaining = Math.round(num);
+
+        if (cr > 0) str += cr + ' Crore ';
+        if (lakh > 0) str += lakh + ' Lakh ';
+        if (thousand > 0) str += thousand + ' Thousand ';
+        if (remaining > 0 && str !== '') str += 'and ' + remaining;
+        else if (remaining > 0) str += remaining;
+
+        return str ? `(Rupees ${str.trim()})` : '';
     }
 
     function switchCalculator(calc) {
@@ -668,8 +706,6 @@
             mainLabel.innerText = "Total Lumpsum investment (₹)";
             sipFields.monthly.slider.max = "10000000";
         }
-        
-        // Reset and trigger update calculations
         syncValue(sipFields, 'monthly', sipFields.monthly.raw, 'init', calculateSIP);
     }
 
@@ -716,10 +752,13 @@
         const totalYears = swpFields.years.raw;
 
         const alertBox = document.getElementById('swp-depletion-alert');
+        const bottomWords = document.getElementById('words-swp-bottom');
+
         if (P === 0 || totalYears === 0) {
             document.getElementById('res-swp-invested').innerText = '₹0';
             document.getElementById('res-swp-withdrawn').innerText = '₹0';
             document.getElementById('res-swp-final').innerText = '₹0';
+            bottomWords.innerText = '';
             alertBox.style.display = 'none';
             updatePieChart('swp-pie', 0);
             return null;
@@ -748,8 +787,8 @@
         document.getElementById('res-swp-invested').innerText = formatIndianCurrency(P);
         document.getElementById('res-swp-withdrawn').innerText = formatIndianCurrency(totalW);
         document.getElementById('res-swp-final').innerText = formatIndianCurrency(finalVal);
+        bottomWords.innerText = convertToFullWords(finalVal);
 
-        // Update SWP chart ratio
         const totalPool = totalW + finalVal;
         const swpRatio = totalPool > 0 ? (finalVal / totalPool) * 100 : 0;
         updatePieChart('swp-pie', swpRatio);
@@ -762,18 +801,20 @@
             alertBox.style.display = 'none';
         }
 
-        return { type: 'SWP', main: P, detail: `SWP: ${formatIndianCurrency(initialMonthlyW)}`, totalW, final: finalVal };
+        return { type: 'SWP', modeSnapshot: 'swp', data: { investment: P, withdrawal: initialMonthlyW, stepup: swpFields.stepup.raw, delay: delayYears, returns: swpFields.returns.raw, years: totalYears }, main: P, detail: `SWP: ${formatIndianCurrency(initialMonthlyW)}`, totalW, final: finalVal };
     }
 
     function calculateSIP() {
         const M = sipFields.monthly.raw;
         const R = sipFields.returns.raw / 100;
         const Y = sipFields.years.raw;
+        const bottomWords = document.getElementById('words-sip-bottom');
 
         if(M === 0 || Y === 0) {
             document.getElementById('res-sip-invested').innerText = '₹0';
             document.getElementById('res-sip-returns').innerText = '₹0';
             document.getElementById('res-sip-total').innerText = '₹0';
+            bottomWords.innerText = '';
             updatePieChart('sip-pie', 0);
             return null;
         }
@@ -787,7 +828,6 @@
             invested = M * n;
             totalValue = i === 0 ? invested : M * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
         } else {
-            // Lumpsum Mode math equation logic
             invested = M;
             totalValue = M * Math.pow(1 + R, Y);
         }
@@ -796,12 +836,33 @@
         document.getElementById('res-sip-invested').innerText = formatIndianCurrency(invested);
         document.getElementById('res-sip-returns').innerText = formatIndianCurrency(estReturns);
         document.getElementById('res-sip-total').innerText = formatIndianCurrency(totalValue);
+        bottomWords.innerText = convertToFullWords(totalValue);
 
-        // Render SIP chart breakdown percentage
         const sipRatio = totalValue > 0 ? (estReturns / totalValue) * 100 : 0;
         updatePieChart('sip-pie', sipRatio);
 
-        return { type: currentSipMode === 'monthly' ? 'SIP' : 'Lumpsum', main: invested, detail: `Amt: ${formatIndianCurrency(M)}`, totalW: estReturns, final: totalValue };
+        return { type: currentSipMode === 'monthly' ? 'SIP' : 'Lumpsum', modeSnapshot: currentSipMode, data: { monthly: M, returns: sipFields.returns.raw, years: Y }, main: invested, detail: `${currentSipMode === 'monthly' ? 'Monthly' : 'Lumpsum'}: ${formatIndianCurrency(M)}`, totalW: estReturns, final: totalValue };
+    }
+
+    // Load History Event Structure Back into State Input Boxes
+    function loadHistoryItem(index) {
+        const item = calculationHistory[index];
+        if (!item) return;
+
+        if (item.type === 'SWP') {
+            switchCalculator('swp');
+            Object.keys(item.data).forEach(k => {
+                syncValue(swpFields, k, item.data[k], 'init', () => {});
+            });
+            calculateSWP();
+        } else {
+            switchCalculator('sip');
+            setSipMode(item.modeSnapshot);
+            Object.keys(item.data).forEach(k => {
+                syncValue(sipFields, k, item.data[k], 'init', () => {});
+            });
+            calculateSIP();
+        }
     }
 
     function renderHistory() {
@@ -811,9 +872,10 @@
             return;
         }
         container.innerHTML = '';
-        calculationHistory.forEach(item => {
+        calculationHistory.forEach((item, idx) => {
             const div = document.createElement('div');
             div.className = 'history-item';
+            div.setAttribute('onclick', `loadHistoryItem(${idx})`);
             div.innerHTML = `
                 <div><span>Type:</span> <strong>${item.type}</strong></div>
                 <div><span>Principal:</span> ${formatIndianCurrency(item.main)}</div>
@@ -857,7 +919,6 @@
         renderHistory();
     }
 
-    // Set initial states cleanly
     Object.keys(swpFields).forEach(k => syncValue(swpFields, k, 0, 'init', calculateSWP));
     Object.keys(sipFields).forEach(k => syncValue(sipFields, k, 0, 'init', calculateSIP));
     renderHistory();
