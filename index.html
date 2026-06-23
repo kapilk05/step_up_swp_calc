@@ -65,13 +65,28 @@
         .label-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 12px;
+        }
+
+        .label-text-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .label-text {
             color: var(--text-main);
             font-size: 14px;
+        }
+
+        /* Words interpreter label */
+        .words-preview {
+            font-size: 12px;
+            color: var(--primary-green);
+            opacity: 0.85;
+            font-weight: 500;
+            min-height: 16px;
         }
 
         .value-box {
@@ -172,7 +187,6 @@
             opacity: 0.9;
         }
 
-        /* History Section Styles */
         .history-container {
             width: 100%;
             max-width: 600px;
@@ -235,61 +249,72 @@
 <div class="calculator-container">
     <h2>Systematic Withdrawal Plan Settings</h2>
 
-    <!-- Total Investment -->
     <div class="input-group">
         <div class="label-row">
-            <span class="label-text">Total investment (₹)</span>
+            <div class="label-text-container">
+                <span class="label-text">Total investment (₹)</span>
+                <span class="words-preview" id="words-investment"></span>
+            </div>
             <input type="text" class="value-box" id="txt-investment" placeholder="e.g. 65,00,000" value="">
         </div>
         <input type="range" id="input-investment" min="0" max="10000000" step="50000" value="0">
     </div>
 
-    <!-- Withdrawal Per Month -->
     <div class="input-group">
         <div class="label-row">
-            <span class="label-text">Withdrawal per month (₹)</span>
+            <div class="label-text-container">
+                <span class="label-text">Withdrawal per month (₹)</span>
+                <span class="words-preview" id="words-withdrawal"></span>
+            </div>
             <input type="text" class="value-box" id="txt-withdrawal" placeholder="e.g. 50,000" value="">
         </div>
         <input type="range" id="input-withdrawal" min="0" max="500000" step="1000" value="0">
     </div>
 
-    <!-- Annual Step-Up -->
     <div class="input-group">
         <div class="label-row">
-            <span class="label-text">Annual Step-Up (%)</span>
+            <div class="label-text-container">
+                <span class="label-text">Annual Step-Up (%)</span>
+                <span class="words-preview" id="words-stepup"></span>
+            </div>
             <input type="text" class="value-box" id="txt-stepup" placeholder="0%" value="">
         </div>
         <input type="range" id="input-stepup" min="0" max="25" step="0.1" value="0">
     </div>
 
-    <!-- SWP Deferment/Delay Year -->
     <div class="input-group">
         <div class="label-row">
-            <span class="label-text">Start SWP from Year (Delay)</span>
+            <div class="label-text-container">
+                <span class="label-text">Start SWP from Year (Delay)</span>
+                <span class="words-preview" id="words-delay"></span>
+            </div>
             <input type="text" class="value-box" id="txt-delay" placeholder="0" value="">
         </div>
         <input type="range" id="input-delay" min="0" max="10" step="1" value="0">
     </div>
 
-    <!-- Expected Return Rate -->
     <div class="input-group">
         <div class="label-row">
-            <span class="label-text">Expected return rate (p.a) (%)</span>
+            <div class="label-text-container">
+                <span class="label-text">Expected return rate (p.a) (%)</span>
+                <span class="words-preview" id="words-returns"></span>
+            </div>
             <input type="text" class="value-box" id="txt-returns" placeholder="0%" value="">
         </div>
         <input type="range" id="input-returns" min="0" max="30" step="0.5" value="0">
     </div>
 
-    <!-- Time Period -->
     <div class="input-group">
         <div class="label-row">
-            <span class="label-text">Time period (Years)</span>
+            <div class="label-text-container">
+                <span class="label-text">Time period (Years)</span>
+                <span class="words-preview" id="words-years"></span>
+            </div>
             <input type="text" class="value-box" id="txt-years" placeholder="0" value="">
         </div>
         <input type="range" id="input-years" min="0" max="40" step="1" value="0">
     </div>
 
-    <!-- Results Display -->
     <div class="results-section">
         <div class="result-row">
             <span class="result-label">Total investment</span>
@@ -310,7 +335,6 @@
     </div>
 </div>
 
-<!-- History Log Component -->
 <div class="history-container">
     <div class="history-header">
         <span class="history-title">Calculation History</span>
@@ -325,12 +349,12 @@
     const START_YEAR = 2026;
 
     const fields = {
-        investment: { slider: document.getElementById('input-investment'), txt: document.getElementById('txt-investment'), raw: 0, type: 'currency' },
-        withdrawal: { slider: document.getElementById('input-withdrawal'), txt: document.getElementById('txt-withdrawal'), raw: 0, type: 'currency' },
-        stepup: { slider: document.getElementById('input-stepup'), txt: document.getElementById('txt-stepup'), raw: 0, type: 'percent' },
-        delay: { slider: document.getElementById('input-delay'), txt: document.getElementById('txt-delay'), raw: 0, type: 'numeric' },
-        returns: { slider: document.getElementById('input-returns'), txt: document.getElementById('txt-returns'), raw: 0, type: 'percent' },
-        years: { slider: document.getElementById('input-years'), txt: document.getElementById('txt-years'), raw: 0, type: 'numeric' }
+        investment: { slider: document.getElementById('input-investment'), txt: document.getElementById('txt-investment'), words: document.getElementById('words-investment'), raw: 0, type: 'currency' },
+        withdrawal: { slider: document.getElementById('input-withdrawal'), txt: document.getElementById('txt-withdrawal'), words: document.getElementById('words-withdrawal'), raw: 0, type: 'currency' },
+        stepup: { slider: document.getElementById('input-stepup'), txt: document.getElementById('txt-stepup'), words: document.getElementById('words-stepup'), raw: 0, type: 'percent' },
+        delay: { slider: document.getElementById('input-delay'), txt: document.getElementById('txt-delay'), words: document.getElementById('words-delay'), raw: 0, type: 'numeric' },
+        returns: { slider: document.getElementById('input-returns'), txt: document.getElementById('txt-returns'), words: document.getElementById('words-returns'), raw: 0, type: 'percent' },
+        years: { slider: document.getElementById('input-years'), txt: document.getElementById('txt-years'), words: document.getElementById('words-years'), raw: 0, type: 'numeric' }
     };
 
     const resTotalInvestment = document.getElementById('res-total-investment');
@@ -353,6 +377,41 @@
         const otherNumbers = x.slice(0, -3);
         if (otherNumbers !== '') lastThree = ',' + lastThree;
         return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+    }
+
+    // Convert values to Indian number naming system (Lakhs / Crores)
+    function convertToIndianWords(num) {
+        if (num === 0) return '';
+        if (num >= 10000000) {
+            let cr = (num / 10000000).toFixed(2);
+            return parseFloat(cr) + ' Crore';
+        }
+        if (num >= 100000) {
+            let lakh = (num / 100000).toFixed(2);
+            return parseFloat(lakh) + ' Lakh';
+        }
+        if (num >= 1000) {
+            let k = (num / 1000).toFixed(2);
+            return parseFloat(k) + ' Thousand';
+        }
+        return num.toString();
+    }
+
+    function updateWordsPreview(key, val) {
+        if (val === 0) {
+            fields[key].words.innerText = '';
+            return;
+        }
+        
+        if (fields[key].type === 'currency') {
+            fields[key].words.innerText = convertToIndianWords(val);
+        } else if (fields[key].type === 'percent') {
+            fields[key].words.innerText = val + (key === 'returns' ? '% p.a.' : '% step-up');
+        } else if (key === 'years') {
+            fields[key].words.innerText = val + (val === 1 ? ' Year tenure' : ' Years tenure');
+        } else if (key === 'delay') {
+            fields[key].words.innerText = val + (val === 1 ? ' Year delay' : ' Years delay');
+        }
     }
 
     function syncValue(key, value, source) {
@@ -383,6 +442,8 @@
                 else fields[key].txt.value = numericVal;
             }
         }
+
+        updateWordsPreview(key, numericVal);
     }
 
     function calculateSWP() {
@@ -481,26 +542,23 @@
         });
     }
 
-    // Save Log Handler
     document.getElementById('btn-save-log').addEventListener('click', () => {
         const currentData = calculateSWP();
-        if (currentData.investment === 0) return; // Don't log empty configurations
+        if (currentData.investment === 0) return;
 
-        calculationHistory.unshift(currentData); // Add to the top
-        if (calculationHistory.length > 5) calculationHistory.pop(); // Cap history logs size to latest 5 items
+        calculationHistory.unshift(currentData);
+        if (calculationHistory.length > 5) calculationHistory.pop();
         
         localStorage.setItem('swp_history', JSON.stringify(calculationHistory));
         renderHistory();
     });
 
-    // Clear History Handler
     document.getElementById('btn-clear-history').addEventListener('click', () => {
         calculationHistory = [];
         localStorage.removeItem('swp_history');
         renderHistory();
     });
 
-    // Handle updates across interactive UI arrays
     Object.keys(fields).forEach(key => {
         fields[key].slider.addEventListener('input', (e) => {
             syncValue(key, e.target.value, 'slider');
@@ -521,7 +579,6 @@
         });
     });
 
-    // Initial load run
     Object.keys(fields).forEach(key => syncValue(key, 0, 'init'));
     calculateSWP();
     renderHistory();
