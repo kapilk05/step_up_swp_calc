@@ -274,7 +274,6 @@
             font-size: 18px;
         }
 
-        /* Words at Bottom styling */
         .bottom-words-display {
             font-size: 13px;
             color: var(--primary-green);
@@ -660,7 +659,6 @@
         return num.toString();
     }
 
-    // Precise Full Word Translation for Bottom Results
     function convertToFullWords(num) {
         if (num <= 0) return '';
         let str = '';
@@ -764,6 +762,7 @@
             return null;
         }
 
+        // SWP effective monthly compounding rate calculation logic matching industry standards
         const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
         const totalMonths = totalYears * 12;
         const delayMonths = delayYears * 12;
@@ -822,8 +821,10 @@
         let invested = 0;
         let totalValue = 0;
 
+        // FIXED: Using geometric compounding matching standard mutual asset engine behaviors
+        const i = Math.pow(1 + R, 1/12) - 1;
+
         if (currentSipMode === 'monthly') {
-            const i = R / 12;
             const n = Y * 12;
             invested = M * n;
             totalValue = i === 0 ? invested : M * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
@@ -844,7 +845,6 @@
         return { type: currentSipMode === 'monthly' ? 'SIP' : 'Lumpsum', modeSnapshot: currentSipMode, data: { monthly: M, returns: sipFields.returns.raw, years: Y }, main: invested, detail: `${currentSipMode === 'monthly' ? 'Monthly' : 'Lumpsum'}: ${formatIndianCurrency(M)}`, totalW: estReturns, final: totalValue };
     }
 
-    // Load History Event Structure Back into State Input Boxes
     function loadHistoryItem(index) {
         const item = calculationHistory[index];
         if (!item) return;
