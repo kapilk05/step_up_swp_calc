@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWP (Systematic Withdrawal Plan) Calculator with Step-Up</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --primary-green: #00d09c;
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --border-color: #21262d;
+            --slider-bg: #21262d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: var(--text-main);
+        }
+
+        .input-group {
+            margin-bottom: 28px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .label-text {
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .value-box {
+            background-color: rgba(0, 208, 156, 0.08);
+            color: var(--primary-green);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            text-align: right;
+            outline: none;
+        }
+
+        /* Custom Range Slider styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--slider-bg);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .results-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .highlight-value {
+            color: var(--primary-green);
+            font-size: 18px;
+        }
+
+        .alert-box {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: none;
+            line-height: 1.4;
+        }
+        
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-container">
+    <h2>SWP (Systematic Withdrawal Plan) Calculator with Step-Up</h2>
+
+    <div class="input-group">
+        <div class="label-row">
+            <span class="label-text">Total investment</span>
+            <span class="value-box" id="display-investment">₹ 65,00,000</span>
+        </div>
+        <input type="range" id="input-investment" min="100000" max="10000000" step="50000" value="6500000">
+    </div>
+
+    <div class="input-group">
+        <div class="label-row">
+            <span class="label-text">Withdrawal per month</span>
+            <span class="value-box" id="display-withdrawal">₹ 50,000</span>
+        </div>
+        <input type="range" id="input-withdrawal" min="5000" max="500000" step="1000" value="50000">
+    </div>
+
+    <div class="input-group">
+        <div class="label-row">
+            <span class="label-text">Annual Step-Up (%)</span>
+            <span class="value-box" id="display-stepup">5%</span>
+        </div>
+        <input type="range" id="input-stepup" min="0" max="20" step="0.1" value="5">
+    </div>
+
+    <div class="input-group">
+        <div class="label-row">
+            <span class="label-text">Expected return rate (p.a)</span>
+            <span class="value-box" id="display-returns">14%</span>
+        </div>
+        <input type="range" id="input-returns" min="1" max="30" step="0.5" value="14">
+    </div>
+
+    <div class="input-group">
+        <div class="label-row">
+            <span class="label-text">Time period</span>
+            <span class="value-box" id="display-years">30 Yr</span>
+        </div>
+        <input type="range" id="input-years" min="1" max="40" step="1" value="30">
+    </div>
+
+    <div class="results-section">
+        <div class="result-row">
+            <span class="result-label">Total investment</span>
+            <span class="result-value" id="res-total-investment">₹65,00,000</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">Total withdrawal</span>
+            <span class="result-value" id="res-total-withdrawal">₹1,80,00,000</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">Final value</span>
+            <span class="result-value highlight-value" id="res-final-value">₹10,36,92,507</span>
+        </div>
+        
+        <div class="alert-box alert-danger" id="depletion-alert"></div>
+    </div>
+</div>
+
+<script>
+    // Elements
+    const fields = {
+        investment: { input: document.getElementById('input-investment'), display: document.getElementById('display-investment') },
+        withdrawal: { input: document.getElementById('input-withdrawal'), display: document.getElementById('display-withdrawal') },
+        stepup: { input: document.getElementById('input-stepup'), display: document.getElementById('display-stepup') },
+        returns: { input: document.getElementById('input-returns'), display: document.getElementById('display-returns') },
+        years: { input: document.getElementById('input-years'), display: document.getElementById('display-years') }
+    };
+
+    const resTotalInvestment = document.getElementById('res-total-investment');
+    const resTotalWithdrawal = document.getElementById('res-total-withdrawal');
+    const resFinalValue = document.getElementById('res-final-value');
+    const depletionAlert = document.getElementById('depletion-alert');
+
+    // Indian Number Formatting System (Lakhs/Crores)
+    function formatIndianCurrency(num) {
+        const x = Math.round(num).toString();
+        let lastThree = x.slice(-3);
+        const otherNumbers = x.slice(0, -3);
+        if (otherNumbers !== '') {
+            lastThree = ',' + lastThree;
+        }
+        return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+    }
+
+    function calculateSWP() {
+        const P = parseFloat(fields.investment.input.value);
+        const initialMonthlyW = parseFloat(fields.withdrawal.input.value);
+        const stepUpRate = parseFloat(fields.stepup.input.value) / 100;
+        const annualReturn = parseFloat(fields.returns.input.value) / 100;
+        const totalYears = parseInt(fields.years.input.value);
+
+        const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
+        const totalMonths = totalYears * 12;
+
+        let currentBalance = P;
+        let totalWithdrawn = 0;
+        let currentMonthlyW = initialMonthlyW;
+        let depletionMonth = null;
+
+        for (let month = 1; month <= totalMonths; month++) {
+            // Apply step-up at the start of every new year (except month 1)
+            if (month > 1 && (month - 1) % 12 === 0) {
+                currentMonthlyW = currentMonthlyW * (1 + stepUpRate);
+            }
+
+            if (currentBalance > 0) {
+                let actualWithdrawal = Math.min(currentMonthlyW, currentBalance);
+                currentBalance -= actualWithdrawal;
+                totalWithdrawn += actualWithdrawal;
+                
+                // Compound the remaining balance for the month
+                currentBalance = currentBalance * (1 + monthlyReturn);
+
+                if (currentBalance <= 0 && depletionMonth === null) {
+                    depletionMonth = month;
+                }
+            } else {
+                if (depletionMonth === null) depletionMonth = month - 1;
+            }
+        }
+
+        // Update UI
+        resTotalInvestment.innerText = formatIndianCurrency(P);
+        resTotalWithdrawal.innerText = formatIndianCurrency(totalWithdrawn);
+        resFinalValue.innerText = formatIndianCurrency(Math.max(0, currentBalance));
+
+        // Display depletion warning if fund runs dry early
+        if (depletionMonth !== null && depletionMonth < totalMonths) {
+            const depYear = Math.floor(depletionMonth / 12);
+            const depRemainingMonths = depletionMonth % 12;
+            let timeString = `${depYear} years`;
+            if (depRemainingMonths > 0) timeString += ` and ${depRemainingMonths} months`;
+            
+            depletionAlert.style.display = 'block';
+            depletionAlert.innerText = `⚠️ Warning: Your portfolio runs out completely in Year ${timeString} due to the step-up compression rate.`;
+        } else {
+            depletionAlert.style.display = 'none';
+        }
+    }
+
+    // Event Listeners for Live Update
+    function updateLabels() {
+        fields.investment.display.innerText = formatIndianCurrency(fields.investment.input.value);
+        fields.withdrawal.display.innerText = formatIndianCurrency(fields.withdrawal.input.value);
+        fields.stepup.display.innerText = fields.stepup.input.value + '%';
+        fields.returns.display.innerText = fields.returns.input.value + '%';
+        fields.years.display.innerText = fields.years.input.value + ' Yr';
+    }
+
+    Object.values(fields).forEach(group => {
+        group.input.addEventListener('input', () => {
+            updateLabels();
+            calculateSWP();
+        });
+    });
+
+    // Initial load run
+    updateLabels();
+    calculateSWP();
+</script>
+
+</body>
+</html>
