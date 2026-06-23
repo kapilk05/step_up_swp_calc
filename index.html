@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Step-Up SWP Calculator</title>
+    <title>Financial Calculators Dashboard</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -13,6 +13,18 @@
             --text-muted: #8b949e;
             --border-color: #21262d;
             --slider-bg: #21262d;
+            --sidebar-hover: #1f242c;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f6f8fa;
+            --card-bg: #ffffff;
+            --primary-green: #00b082;
+            --text-main: #24292f;
+            --text-muted: #57606a;
+            --border-color: #d0d7de;
+            --slider-bg: #e1e4e8;
+            --sidebar-hover: #f3f4f6;
         }
 
         * {
@@ -28,34 +40,65 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
             min-height: 100vh;
             padding: 40px 20px;
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
         }
 
-        h1.main-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 24px;
+        .theme-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .calculator-container {
+        .dashboard-layout {
+            display: flex;
             width: 100%;
-            max-width: 600px;
+            max-width: 1000px;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .main-content {
+            flex: 2;
+            min-width: 0;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .calculator-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 32px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+
+        .calculator-card.active {
+            display: block;
         }
 
         h2 {
             font-size: 20px;
             font-weight: 600;
-            margin-bottom: 32px;
-            color: var(--text-main);
+            margin-bottom: 28px;
         }
 
         .input-group {
@@ -80,7 +123,6 @@
             font-size: 14px;
         }
 
-        /* Words interpreter label */
         .words-preview {
             font-size: 12px;
             color: var(--primary-green);
@@ -90,17 +132,16 @@
         }
 
         .value-box {
-            background-color: rgba(0, 208, 156, 0.08);
+            background-color: rgba(0, 208, 156, 0.06);
             color: var(--primary-green);
-            padding: 6px 12px;
+            padding: 8px 12px;
             border-radius: 4px;
             font-size: 16px;
             font-weight: 600;
-            border: 1px solid transparent;
+            border: 1px solid var(--border-color);
             text-align: right;
             outline: none;
-            width: 140px;
-            transition: border 0.2s;
+            width: 150px;
         }
 
         .value-box:focus {
@@ -171,7 +212,6 @@
 
         .btn-log {
             background-color: var(--primary-green);
-            color: #000000;
             border: none;
             padding: 10px 16px;
             border-radius: 4px;
@@ -180,16 +220,50 @@
             cursor: pointer;
             width: 100%;
             margin-top: 12px;
-            transition: opacity 0.2s;
+        }
+        body:not([data-theme="light"]) .btn-log { color: #000000; }
+        [data-theme="light"] .btn-log { color: #ffffff; }
+
+        /* Right Hand Menu Layout Sidebar Components */
+        .sidebar-menu {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
         }
 
-        .btn-log:hover {
-            opacity: 0.9;
+        .menu-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 14px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .menu-item.active {
+            color: var(--primary-green);
+            background: rgba(0, 208, 156, 0.08);
+            font-weight: 600;
         }
 
         .history-container {
-            width: 100%;
-            max-width: 600px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -206,7 +280,7 @@
         }
 
         .history-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
         }
 
@@ -219,7 +293,7 @@
         }
 
         .history-item {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(125, 125, 125, 0.04);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 12px;
@@ -244,132 +318,179 @@
 </head>
 <body>
 
-<h1 class="main-title">SWP Calculator</h1>
+<button class="theme-toggle-btn" id="theme-toggle">☀️ Light Mode</button>
 
-<div class="calculator-container">
-    <h2>Systematic Withdrawal Plan Settings</h2>
-
-    <div class="input-group">
-        <div class="label-row">
-            <div class="label-text-container">
-                <span class="label-text">Total investment (₹)</span>
-                <span class="words-preview" id="words-investment"></span>
-            </div>
-            <input type="text" class="value-box" id="txt-investment" placeholder="e.g. 65,00,000" value="">
-        </div>
-        <input type="range" id="input-investment" min="0" max="10000000" step="50000" value="0">
-    </div>
-
-    <div class="input-group">
-        <div class="label-row">
-            <div class="label-text-container">
-                <span class="label-text">Withdrawal per month (₹)</span>
-                <span class="words-preview" id="words-withdrawal"></span>
-            </div>
-            <input type="text" class="value-box" id="txt-withdrawal" placeholder="e.g. 50,000" value="">
-        </div>
-        <input type="range" id="input-withdrawal" min="0" max="500000" step="1000" value="0">
-    </div>
-
-    <div class="input-group">
-        <div class="label-row">
-            <div class="label-text-container">
-                <span class="label-text">Annual Step-Up (%)</span>
-                <span class="words-preview" id="words-stepup"></span>
-            </div>
-            <input type="text" class="value-box" id="txt-stepup" placeholder="0%" value="">
-        </div>
-        <input type="range" id="input-stepup" min="0" max="25" step="0.1" value="0">
-    </div>
-
-    <div class="input-group">
-        <div class="label-row">
-            <div class="label-text-container">
-                <span class="label-text">Start SWP from Year (Delay)</span>
-                <span class="words-preview" id="words-delay"></span>
-            </div>
-            <input type="text" class="value-box" id="txt-delay" placeholder="0" value="">
-        </div>
-        <input type="range" id="input-delay" min="0" max="10" step="1" value="0">
-    </div>
-
-    <div class="input-group">
-        <div class="label-row">
-            <div class="label-text-container">
-                <span class="label-text">Expected return rate (p.a) (%)</span>
-                <span class="words-preview" id="words-returns"></span>
-            </div>
-            <input type="text" class="value-box" id="txt-returns" placeholder="0%" value="">
-        </div>
-        <input type="range" id="input-returns" min="0" max="30" step="0.5" value="0">
-    </div>
-
-    <div class="input-group">
-        <div class="label-row">
-            <div class="label-text-container">
-                <span class="label-text">Time period (Years)</span>
-                <span class="words-preview" id="words-years"></span>
-            </div>
-            <input type="text" class="value-box" id="txt-years" placeholder="0" value="">
-        </div>
-        <input type="range" id="input-years" min="0" max="40" step="1" value="0">
-    </div>
-
-    <div class="results-section">
-        <div class="result-row">
-            <span class="result-label">Total investment</span>
-            <span class="result-value" id="res-total-investment">₹0</span>
-        </div>
-        <div class="result-row">
-            <span class="result-label">Total withdrawal</span>
-            <span class="result-value" id="res-total-withdrawal">₹0</span>
-        </div>
-        <div class="result-row">
-            <span class="result-label">Final value</span>
-            <span class="result-value highlight-value" id="res-final-value">₹0</span>
-        </div>
+<div class="dashboard-layout">
+    
+    <!-- LEFT COLUMN: Dynamic Calculators Area -->
+    <div class="main-content">
         
-        <div class="alert-box alert-danger" id="depletion-alert"></div>
-        
-        <button class="btn-log" id="btn-save-log">Save Calculation to History</button>
-    </div>
-</div>
+        <!-- MODULE A: Step-Up SWP Calculator -->
+        <div class="calculator-card active" id="card-swp">
+            <h2>SWP Calculator with Step-Up</h2>
+            
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Total investment (₹)</span>
+                        <span class="words-preview" id="words-swp-investment"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-swp-investment" placeholder="e.g. 65,00,000" value="">
+                </div>
+                <input type="range" id="input-swp-investment" min="0" max="10000000" step="50000" value="0">
+            </div>
 
-<div class="history-container">
-    <div class="history-header">
-        <span class="history-title">Calculation History</span>
-        <button class="clear-btn" id="btn-clear-history">Clear All</button>
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Withdrawal per month (₹)</span>
+                        <span class="words-preview" id="words-swp-withdrawal"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-swp-withdrawal" placeholder="e.g. 50,000" value="">
+                </div>
+                <input type="range" id="input-swp-withdrawal" min="0" max="500000" step="1000" value="0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Annual Step-Up (%)</span>
+                        <span class="words-preview" id="words-swp-stepup"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-swp-stepup" placeholder="0%" value="">
+                </div>
+                <input type="range" id="input-swp-stepup" min="0" max="25" step="0.1" value="0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Start SWP from Year (Delay)</span>
+                        <span class="words-preview" id="words-swp-delay"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-swp-delay" placeholder="0" value="">
+                </div>
+                <input type="range" id="input-swp-delay" min="0" max="10" step="1" value="0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Expected return rate (p.a) (%)</span>
+                        <span class="words-preview" id="words-swp-returns"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-swp-returns" placeholder="0%" value="">
+                </div>
+                <input type="range" id="input-swp-returns" min="0" max="30" step="0.5" value="0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Time period (Years)</span>
+                        <span class="words-preview" id="words-swp-years"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-swp-years" placeholder="0" value="">
+                </div>
+                <input type="range" id="input-swp-years" min="0" max="40" step="1" value="0">
+            </div>
+
+            <div class="results-section">
+                <div class="result-row"><span class="result-label">Total investment</span><span class="result-value" id="res-swp-invested">₹0</span></div>
+                <div class="result-row"><span class="result-label">Total withdrawal</span><span class="result-value" id="res-swp-withdrawn">₹0</span></div>
+                <div class="result-row"><span class="result-label">Final value</span><span class="result-value highlight-value" id="res-swp-final">₹0</span></div>
+                <div class="alert-box alert-danger" id="swp-depletion-alert"></div>
+                <button class="btn-log" id="btn-save-swp">Save to History</button>
+            </div>
+        </div>
+
+        <!-- MODULE B: Normal SIP Calculator -->
+        <div class="calculator-card" id="card-sip">
+            <h2>SIP Calculator</h2>
+            
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Monthly investment (₹)</span>
+                        <span class="words-preview" id="words-sip-monthly"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-sip-monthly" placeholder="e.g. 25,000" value="">
+                </div>
+                <input type="range" id="input-sip-monthly" min="0" max="500000" step="500" value="0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Expected return rate (p.a) (%)</span>
+                        <span class="words-preview" id="words-sip-returns"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-sip-returns" placeholder="0%" value="">
+                </div>
+                <input type="range" id="input-sip-returns" min="0" max="30" step="0.5" value="0">
+            </div>
+
+            <div class="input-group">
+                <div class="label-row">
+                    <div class="label-text-container">
+                        <span class="label-text">Time period (Years)</span>
+                        <span class="words-preview" id="words-sip-years"></span>
+                    </div>
+                    <input type="text" class="value-box" id="txt-sip-years" placeholder="0" value="">
+                </div>
+                <input type="range" id="input-sip-years" min="0" max="40" step="1" value="0">
+            </div>
+
+            <div class="results-section">
+                <div class="result-row"><span class="result-label">Invested amount</span><span class="result-value" id="res-sip-invested">₹0</span></div>
+                <div class="result-row"><span class="result-label">Est. returns</span><span class="result-value" id="res-sip-returns">₹0</span></div>
+                <div class="result-row"><span class="result-label">Total value</span><span class="result-value highlight-value" id="res-sip-total">₹0</span></div>
+                <button class="btn-log" id="btn-save-sip">Save to History</button>
+            </div>
+        </div>
+
     </div>
-    <div id="history-list">
-        <div class="empty-history">No past calculations saved yet.</div>
+
+    <!-- RIGHT COLUMN: Sidebar Navigation and History Tracker -->
+    <div class="sidebar-content">
+        <div class="sidebar-menu">
+            <div class="menu-title">Popular Calculators</div>
+            <div class="menu-item active" id="menu-swp" onclick="switchCalculator('swp')">SWP Calculator</div>
+            <div class="menu-item" id="menu-sip" onclick="switchCalculator('sip')">SIP Calculator</div>
+        </div>
+
+        <div class="history-container">
+            <div class="history-header">
+                <span class="history-title">Calculation History</span>
+                <button class="clear-btn" id="btn-clear-history">Clear All</button>
+            </div>
+            <div id="history-list"><div class="empty-history">No past calculations saved yet.</div></div>
+        </div>
     </div>
+
 </div>
 
 <script>
     const START_YEAR = 2026;
+    let calculationHistory = JSON.parse(localStorage.getItem('dashboard_history')) || [];
 
-    const fields = {
-        investment: { slider: document.getElementById('input-investment'), txt: document.getElementById('txt-investment'), words: document.getElementById('words-investment'), raw: 0, type: 'currency' },
-        withdrawal: { slider: document.getElementById('input-withdrawal'), txt: document.getElementById('txt-withdrawal'), words: document.getElementById('words-withdrawal'), raw: 0, type: 'currency' },
-        stepup: { slider: document.getElementById('input-stepup'), txt: document.getElementById('txt-stepup'), words: document.getElementById('words-stepup'), raw: 0, type: 'percent' },
-        delay: { slider: document.getElementById('input-delay'), txt: document.getElementById('txt-delay'), words: document.getElementById('words-delay'), raw: 0, type: 'numeric' },
-        returns: { slider: document.getElementById('input-returns'), txt: document.getElementById('txt-returns'), words: document.getElementById('words-returns'), raw: 0, type: 'percent' },
-        years: { slider: document.getElementById('input-years'), txt: document.getElementById('txt-years'), words: document.getElementById('words-years'), raw: 0, type: 'numeric' }
+    const swpFields = {
+        investment: { slider: document.getElementById('input-swp-investment'), txt: document.getElementById('txt-swp-investment'), words: document.getElementById('words-swp-investment'), raw: 0, type: 'currency' },
+        withdrawal: { slider: document.getElementById('input-swp-withdrawal'), txt: document.getElementById('txt-swp-withdrawal'), words: document.getElementById('words-swp-withdrawal'), raw: 0, type: 'currency' },
+        stepup: { slider: document.getElementById('input-swp-stepup'), txt: document.getElementById('txt-swp-stepup'), words: document.getElementById('words-swp-stepup'), raw: 0, type: 'percent' },
+        delay: { slider: document.getElementById('input-swp-delay'), txt: document.getElementById('txt-swp-delay'), words: document.getElementById('words-swp-delay'), raw: 0, type: 'numeric' },
+        returns: { slider: document.getElementById('input-swp-returns'), txt: document.getElementById('txt-swp-returns'), words: document.getElementById('words-swp-returns'), raw: 0, type: 'percent' },
+        years: { slider: document.getElementById('input-swp-years'), txt: document.getElementById('txt-swp-years'), words: document.getElementById('words-swp-years'), raw: 0, type: 'numeric' }
     };
 
-    const resTotalInvestment = document.getElementById('res-total-investment');
-    const resTotalWithdrawal = document.getElementById('res-total-withdrawal');
-    const resFinalValue = document.getElementById('res-final-value');
-    const depletionAlert = document.getElementById('depletion-alert');
-    const historyList = document.getElementById('history-list');
+    const sipFields = {
+        monthly: { slider: document.getElementById('input-sip-monthly'), txt: document.getElementById('txt-sip-monthly'), words: document.getElementById('words-sip-monthly'), raw: 0, type: 'currency' },
+        returns: { slider: document.getElementById('input-sip-returns'), txt: document.getElementById('txt-sip-returns'), words: document.getElementById('words-sip-returns'), raw: 0, type: 'percent' },
+        years: { slider: document.getElementById('input-sip-years'), txt: document.getElementById('txt-sip-years'), words: document.getElementById('words-sip-years'), raw: 0, type: 'numeric' }
+    };
 
-    let calculationHistory = JSON.parse(localStorage.getItem('swp_history')) || [];
-
-    function cleanNumber(str) {
-        if (!str) return 0;
-        return parseFloat(str.replace(/[^0-9.-]/g, '')) || 0;
-    }
-
+    // Shared Utilities
+    function cleanNumber(str) { return parseFloat(str.replace(/[^0-9.-]/g, '')) || 0; }
     function formatIndianCurrency(num) {
         if (num === 0) return '₹0';
         const x = Math.round(num).toString();
@@ -378,209 +499,197 @@
         if (otherNumbers !== '') lastThree = ',' + lastThree;
         return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
     }
-
-    // Convert values to Indian number naming system (Lakhs / Crores)
+    function formatRawToIndianCommas(num, type) {
+        if (num === 0) return '';
+        if (type === 'percent') return num + '%';
+        if (type === 'numeric') return num;
+        const x = Math.round(num).toString();
+        let lastThree = x.slice(-3);
+        const otherNumbers = x.slice(0, -3);
+        if (otherNumbers !== '') lastThree = ',' + lastThree;
+        return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+    }
     function convertToIndianWords(num) {
         if (num === 0) return '';
-        if (num >= 10000000) {
-            let cr = (num / 10000000).toFixed(2);
-            return parseFloat(cr) + ' Crore';
-        }
-        if (num >= 100000) {
-            let lakh = (num / 100000).toFixed(2);
-            return parseFloat(lakh) + ' Lakh';
-        }
-        if (num >= 1000) {
-            let k = (num / 1000).toFixed(2);
-            return parseFloat(k) + ' Thousand';
-        }
+        if (num >= 10000000) return parseFloat((num / 10000000).toFixed(2)) + ' Crore';
+        if (num >= 100000) return parseFloat((num / 100000).toFixed(2)) + ' Lakh';
+        if (num >= 1000) return parseFloat((num / 1000).toFixed(2)) + ' Thousand';
         return num.toString();
     }
 
-    function updateWordsPreview(key, val) {
-        if (val === 0) {
-            fields[key].words.innerText = '';
-            return;
-        }
-        
-        if (fields[key].type === 'currency') {
-            fields[key].words.innerText = convertToIndianWords(val);
-        } else if (fields[key].type === 'percent') {
-            fields[key].words.innerText = val + (key === 'returns' ? '% p.a.' : '% step-up');
-        } else if (key === 'years') {
-            fields[key].words.innerText = val + (val === 1 ? ' Year tenure' : ' Years tenure');
-        } else if (key === 'delay') {
-            fields[key].words.innerText = val + (val === 1 ? ' Year delay' : ' Years delay');
+    function switchCalculator(calc) {
+        document.querySelectorAll('.calculator-card').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        if(calc === 'swp') {
+            document.getElementById('card-swp').classList.add('active');
+            document.getElementById('menu-swp').classList.add('active');
+        } else {
+            document.getElementById('card-sip').classList.add('active');
+            document.getElementById('menu-sip').classList.add('active');
         }
     }
 
-    function syncValue(key, value, source) {
+    function updateWords(fieldsObj, key, val) {
+        if (val === 0) { fieldsObj[key].words.innerText = ''; return; }
+        if (fieldsObj[key].type === 'currency') fieldsObj[key].words.innerText = convertToIndianWords(val);
+        else if (fieldsObj[key].type === 'percent') fieldsObj[key].words.innerText = val + '% p.a.';
+        else fieldsObj[key].words.innerText = val + (val === 1 ? ' Year' : ' Years');
+    }
+
+    function syncValue(fieldsObj, key, value, source, callback) {
         let numericVal = value;
-        if (typeof value === 'string') {
-            if (value.trim() === '') {
-                numericVal = 0;
-            } else {
-                numericVal = cleanNumber(value);
-            }
+        if (typeof value === 'string') numericVal = value.trim() === '' ? 0 : cleanNumber(value);
+        if (source !== 'text-active') {
+            const min = parseFloat(fieldsObj[key].slider.min);
+            const max = parseFloat(fieldsObj[key].slider.max);
+            if (numericVal < min) numericVal = min;
+            if (numericVal > max) numericVal = max;
         }
-
-        const min = parseFloat(fields[key].slider.min);
-        const max = parseFloat(fields[key].slider.max);
-        if (numericVal < min) numericVal = min;
-        if (numericVal > max) numericVal = max;
-
-        fields[key].raw = numericVal;
-
-        if (source !== 'slider') fields[key].slider.value = numericVal;
-        
-        if (source !== 'text') {
-            if (numericVal === 0 && source === 'init') {
-                fields[key].txt.value = '';
-            } else {
-                if (fields[key].type === 'currency') fields[key].txt.value = formatIndianCurrency(numericVal).replace('₹', '₹ ');
-                else if (fields[key].type === 'percent') fields[key].txt.value = numericVal + '%';
-                else fields[key].txt.value = numericVal;
-            }
-        }
-
-        updateWordsPreview(key, numericVal);
+        fieldsObj[key].raw = numericVal;
+        if (source !== 'slider') fieldsObj[key].slider.value = numericVal;
+        if (source !== 'text-active') fieldsObj[key].txt.value = formatRawToIndianCommas(numericVal, fieldsObj[key].type);
+        updateWords(fieldsObj, key, numericVal);
+        callback();
     }
 
+    // Engine Core Math Formulas
     function calculateSWP() {
-        const P = fields.investment.raw;
-        const initialMonthlyW = fields.withdrawal.raw;
-        const stepUpRate = fields.stepup.raw / 100;
-        const delayYears = fields.delay.raw;
-        const annualReturn = fields.returns.raw / 100;
-        const totalYears = fields.years.raw;
+        const P = swpFields.investment.raw;
+        const initialMonthlyW = swpFields.withdrawal.raw;
+        const stepUpRate = swpFields.stepup.raw / 100;
+        const delayYears = swpFields.delay.raw;
+        const annualReturn = swpFields.returns.raw / 100;
+        const totalYears = swpFields.years.raw;
 
+        const alertBox = document.getElementById('swp-depletion-alert');
         if (P === 0 || totalYears === 0) {
-            resTotalInvestment.innerText = '₹0';
-            resTotalWithdrawal.innerText = '₹0';
-            resFinalValue.innerText = '₹0';
-            depletionAlert.style.display = 'none';
-            return { totalInvestment: 0, totalWithdrawal: 0, finalValue: 0, status: 'N/A' };
+            document.getElementById('res-swp-invested').innerText = '₹0';
+            document.getElementById('res-swp-withdrawn').innerText = '₹0';
+            document.getElementById('res-swp-final').innerText = '₹0';
+            alertBox.style.display = 'none';
+            return null;
         }
 
         const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
         const totalMonths = totalYears * 12;
         const delayMonths = delayYears * 12;
 
-        let currentBalance = P;
-        let totalWithdrawn = 0;
-        let depletionMonth = null;
+        let balance = P, totalW = 0, depletionMonth = null;
 
-        for (let month = 1; month <= totalMonths; month++) {
-            currentBalance = currentBalance * (1 + monthlyReturn);
-
-            if (month > delayMonths && currentBalance > 0) {
-                const monthsWithdrawing = month - delayMonths;
-                const currentYearTier = Math.floor((monthsWithdrawing - 1) / 12);
-                const currentMonthlyW = initialMonthlyW * Math.pow(1 + stepUpRate, currentYearTier);
-
-                let actualWithdrawal = Math.min(currentMonthlyW, currentBalance);
-                currentBalance -= actualWithdrawal;
-                totalWithdrawn += actualWithdrawal;
-
-                if (currentBalance <= 0 && depletionMonth === null) {
-                    depletionMonth = month;
-                }
+        for (let m = 1; m <= totalMonths; m++) {
+            balance *= (1 + monthlyReturn);
+            if (m > delayMonths && balance > 0) {
+                const activeMonths = m - delayMonths;
+                const tier = Math.floor((activeMonths - 1) / 12);
+                const currentMonthlyW = initialMonthlyW * Math.pow(1 + stepUpRate, tier);
+                let actualW = Math.min(currentMonthlyW, balance);
+                balance -= actualW;
+                totalW += actualW;
+                if (balance <= 0 && depletionMonth === null) depletionMonth = m;
             }
         }
 
-        const formattedFinal = Math.max(0, currentBalance);
-        resTotalInvestment.innerText = formatIndianCurrency(P);
-        resTotalWithdrawal.innerText = formatIndianCurrency(totalWithdrawn);
-        resFinalValue.innerText = formatIndianCurrency(formattedFinal);
+        document.getElementById('res-swp-invested').innerText = formatIndianCurrency(P);
+        document.getElementById('res-swp-withdrawn').innerText = formatIndianCurrency(totalW);
+        document.getElementById('res-swp-final').innerText = formatIndianCurrency(Math.max(0, balance));
 
-        let statusText = "Sustained";
-        if (depletionMonth !== null && depletionMonth <= totalMonths && initialMonthlyW > 0) {
-            const elapsedYears = Math.floor(depletionMonth / 12);
-            const remainingMonths = depletionMonth % 12;
-            const absoluteTargetYear = START_YEAR + elapsedYears;
-
-            depletionAlert.style.display = 'block';
-            let monthLabel = remainingMonths > 0 ? ` Month ${remainingMonths}` : '';
-            depletionAlert.innerHTML = `⚠️ <strong>Portfolio Exhausted:</strong> Your corpus drops to ₹0 in <strong>${absoluteTargetYear}</strong> (${elapsedYears} years${monthLabel} from initialization).`;
-            statusText = `Exhausted (${absoluteTargetYear})`;
+        if (depletionMonth && initialMonthlyW > 0) {
+            const elY = Math.floor(depletionMonth / 12);
+            alertBox.style.display = 'block';
+            alertBox.innerHTML = `⚠️ <strong>Exhausted:</strong> Corpus hits zero in <strong>${START_YEAR + elY}</strong>.`;
         } else {
-            depletionAlert.style.display = 'none';
+            alertBox.style.display = 'none';
         }
 
-        return {
-            investment: P,
-            withdrawal: initialMonthlyW,
-            stepup: fields.stepup.raw,
-            years: totalYears,
-            returns: fields.returns.raw,
-            delay: delayYears,
-            totalWithdrawal: totalWithdrawn,
-            finalValue: formattedFinal,
-            status: statusText
-        };
+        return { type: 'SWP', main: P, detail: `SWP: ${formatIndianCurrency(initialMonthlyW)}`, totalW, final: Math.max(0, balance) };
+    }
+
+    function calculateSIP() {
+        const M = sipFields.monthly.raw;
+        const i = (sipFields.returns.raw / 100) / 12;
+        const n = sipFields.years.raw * 12;
+
+        if(M === 0 || n === 0) {
+            document.getElementById('res-sip-invested').innerText = '₹0';
+            document.getElementById('res-sip-returns').innerText = '₹0';
+            document.getElementById('res-sip-total').innerText = '₹0';
+            return null;
+        }
+
+        const invested = M * n;
+        // Standard Future Value compound equation for standard SIP mutual assets
+        const totalValue = i === 0 ? invested : M * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+        const estReturns = Math.max(0, totalValue - invested);
+
+        document.getElementById('res-sip-invested').innerText = formatIndianCurrency(invested);
+        document.getElementById('res-sip-returns').innerText = formatIndianCurrency(estReturns);
+        document.getElementById('res-sip-total').innerText = formatIndianCurrency(totalValue);
+
+        return { type: 'SIP', main: invested, detail: `Monthly: ${formatIndianCurrency(M)}`, totalW: estReturns, final: totalValue };
     }
 
     function renderHistory() {
+        const container = document.getElementById('history-list');
         if (calculationHistory.length === 0) {
-            historyList.innerHTML = '<div class="empty-history">No past calculations saved yet.</div>';
+            container.innerHTML = '<div class="empty-history">No past calculations saved yet.</div>';
             return;
         }
-
-        historyList.innerHTML = '';
-        calculationHistory.forEach((item, index) => {
+        container.innerHTML = '';
+        calculationHistory.forEach(item => {
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <div><span>Invested:</span> ${formatIndianCurrency(item.investment)}</div>
-                <div><span>Monthly SWP:</span> ${formatIndianCurrency(item.withdrawal)} (${item.stepup}%)</div>
-                <div><span>Timeline:</span> ${item.years} Yrs (Delay: ${item.delay}Y)</div>
-                <div><span>ROI:</span> ${item.returns}%</div>
-                <div><span>Total Payout:</span> ${formatIndianCurrency(item.totalWithdrawal)}</div>
-                <div><span>Final Value:</span> <strong style="color: ${item.finalValue > 0 ? 'var(--primary-green)' : '#f87171'}">${formatIndianCurrency(item.finalValue)}</strong></div>
+                <div><span>Type:</span> <strong>${item.type}</strong></div>
+                <div><span>Inputs:</span> ${item.detail}</div>
+                <div><span>${item.type === 'SIP' ? 'Est Returns:' : 'Total Payout:'}</span> ${formatIndianCurrency(item.totalW)}</div>
+                <div><span>Final Value:</span> <strong style="color:var(--primary-green)">${formatIndianCurrency(item.final)}</strong></div>
             `;
-            historyList.appendChild(div);
+            container.appendChild(div);
         });
     }
 
-    document.getElementById('btn-save-log').addEventListener('click', () => {
-        const currentData = calculateSWP();
-        if (currentData.investment === 0) return;
+    function hookEvents(fieldsObj, calcFunc) {
+        Object.keys(fieldsObj).forEach(key => {
+            fieldsObj[key].slider.addEventListener('input', (e) => syncValue(fieldsObj, key, e.target.value, 'slider', calcFunc));
+            fieldsObj[key].txt.addEventListener('input', (e) => {
+                let pos = e.target.selectionStart, oldLen = e.target.value.length;
+                let num = cleanNumber(e.target.value);
+                syncValue(fieldsObj, key, num, 'text-active', calcFunc);
+                if (e.target.value !== '') e.target.value = formatRawToIndianCommas(num, fieldsObj[key].type);
+                e.target.setSelectionRange(pos + (e.target.value.length - oldLen), pos + (e.target.value.length - oldLen));
+            });
+            fieldsObj[key].txt.addEventListener('blur', (e) => syncValue(fieldsObj, key, e.target.value, 'blur', calcFunc));
+        });
+    }
 
-        calculationHistory.unshift(currentData);
-        if (calculationHistory.length > 5) calculationHistory.pop();
-        
-        localStorage.setItem('swp_history', JSON.stringify(calculationHistory));
-        renderHistory();
+    // Handlers & Initializers
+    hookEvents(swpFields, calculateSWP);
+    hookEvents(sipFields, calculateSIP);
+
+    document.getElementById('btn-save-swp').addEventListener('click', () => {
+        const res = calculateSWP(); if(res) { calculationHistory.unshift(res); saveHistory(); }
     });
-
+    document.getElementById('btn-save-sip').addEventListener('click', () => {
+        const res = calculateSIP(); if(res) { calculationHistory.unshift(res); saveHistory(); }
+    });
     document.getElementById('btn-clear-history').addEventListener('click', () => {
-        calculationHistory = [];
-        localStorage.removeItem('swp_history');
+        calculationHistory = []; localStorage.removeItem('dashboard_history'); renderHistory();
+    });
+    function saveHistory() {
+        if(calculationHistory.length > 5) calculationHistory.pop();
+        localStorage.setItem('dashboard_history', JSON.stringify(calculationHistory));
         renderHistory();
+    }
+
+    // Theme Toggle Trigger Setup
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        const isLight = document.body.getAttribute('data-theme') === 'light';
+        document.body.toggleAttribute('data-theme', !isLight);
+        document.getElementById('theme-toggle').innerText = isLight ? "☀️ Light Mode" : "🌙 Dark Mode";
     });
 
-    Object.keys(fields).forEach(key => {
-        fields[key].slider.addEventListener('input', (e) => {
-            syncValue(key, e.target.value, 'slider');
-            calculateSWP();
-        });
-
-        fields[key].txt.addEventListener('change', (e) => {
-            syncValue(key, e.target.value, 'text');
-            calculateSWP();
-        });
-        
-        fields[key].txt.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                syncValue(key, e.target.value, 'text');
-                calculateSWP();
-                e.target.blur();
-            }
-        });
-    });
-
-    Object.keys(fields).forEach(key => syncValue(key, 0, 'init'));
-    calculateSWP();
+    Object.keys(swpFields).forEach(k => syncValue(swpFields, k, 0, 'init', calculateSWP));
+    Object.keys(sipFields).forEach(k => syncValue(sipFields, k, 0, 'init', calculateSIP));
     renderHistory();
 </script>
 
